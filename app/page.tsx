@@ -1,41 +1,34 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import ImageOverlay from "@/components/image-overlay"
-
-type ShiftsData = {
-  [key: number]: { [key: number]: string }
-}
+import { useSupabaseData } from "@/hooks/use-supabase-data"
 
 export default function Home() {
-  const [image1, setImage1] = useState<string | null>(null)
-  const [image2, setImage2] = useState<string | null>(null)
+  const {
+    shiftsData,
+    exitPositions1,
+    exitPositions2,
+    image1,
+    image2,
+    loading,
+  } = useSupabaseData()
+
   const [currentShift, setCurrentShift] = useState<number | null>(null)
-  const [shiftsData, setShiftsData] = useState<ShiftsData>({
-    1: {},
-    2: {},
-    3: {},
-    4: {},
-  })
   const [selectedExit, setSelectedExit] = useState<number | null>(null)
-  const [exitPositions1, setExitPositions1] = useState<{ [key: number]: { x: number; y: number } }>({})
-  const [exitPositions2, setExitPositions2] = useState<{ [key: number]: { x: number; y: number } }>({})
-
-  useEffect(() => {
-    const savedShiftsData = localStorage.getItem("shiftsData")
-    const savedExitPositions1 = localStorage.getItem("exitPositions1")
-    const savedExitPositions2 = localStorage.getItem("exitPositions2")
-    const savedImage1 = localStorage.getItem("emergencyImage1")
-    const savedImage2 = localStorage.getItem("emergencyImage2")
-
-    if (savedShiftsData) setShiftsData(JSON.parse(savedShiftsData))
-    if (savedExitPositions1) setExitPositions1(JSON.parse(savedExitPositions1))
-    if (savedExitPositions2) setExitPositions2(JSON.parse(savedExitPositions2))
-    if (savedImage1) setImage1(savedImage1)
-    if (savedImage2) setImage2(savedImage2)
-  }, [])
 
   const exits = currentShift ? shiftsData[currentShift] || {} : {}
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-gradient-to-br from-background via-background to-muted flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-foreground text-lg font-medium">Cargando turnos...</p>
+        </div>
+      </main>
+    )
+  }
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-background via-background to-muted">

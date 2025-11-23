@@ -1,94 +1,85 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import ImageUploader from "@/components/image-uploader"
 import ExitForm from "@/components/exit-form"
 import ExitsList from "@/components/exits-list"
 import ImageOverlay from "@/components/image-overlay"
 import PositionMapper from "@/components/position-mapper"
 import ShiftSelector from "@/components/shift-selector"
-
-type ShiftsData = {
-  [key: number]: { [key: number]: string }
-}
+import { useSupabaseData } from "@/hooks/use-supabase-data"
 
 interface AdminDashboardProps {
   onLogout: () => void
 }
 
 export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
-  const [image1, setImage1] = useState<string | null>(null)
-  const [image2, setImage2] = useState<string | null>(null)
+  const {
+    shiftsData,
+    exitPositions1,
+    exitPositions2,
+    image1,
+    image2,
+    loading,
+    saveExitName,
+    saveExitPositions,
+    saveImage,
+    clearAllData,
+  } = useSupabaseData()
+
   const [currentShift, setCurrentShift] = useState(1)
-  const [shiftsData, setShiftsData] = useState<ShiftsData>({
-    1: {},
-    2: {},
-    3: {},
-    4: {},
-  })
   const [selectedExit, setSelectedExit] = useState<number | null>(null)
-  const [exitPositions1, setExitPositions1] = useState<{ [key: number]: { x: number; y: number } }>({})
-  const [exitPositions2, setExitPositions2] = useState<{ [key: number]: { x: number; y: number } }>({})
   const [isMapping1, setIsMapping1] = useState(false)
   const [isMapping2, setIsMapping2] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
-  useEffect(() => {
-    const savedShiftsData = localStorage.getItem("shiftsData")
-    const savedExitPositions1 = localStorage.getItem("exitPositions1")
-    const savedExitPositions2 = localStorage.getItem("exitPositions2")
-    const savedImage1 = localStorage.getItem("emergencyImage1")
-    const savedImage2 = localStorage.getItem("emergencyImage2")
-
-    if (savedShiftsData) setShiftsData(JSON.parse(savedShiftsData))
-    if (savedExitPositions1) setExitPositions1(JSON.parse(savedExitPositions1))
-    if (savedExitPositions2) setExitPositions2(JSON.parse(savedExitPositions2))
-    if (savedImage1) setImage1(savedImage1)
-    if (savedImage2) setImage2(savedImage2)
-  }, [])
-
-  useEffect(() => {
-    localStorage.setItem("shiftsData", JSON.stringify(shiftsData))
-  }, [shiftsData])
-
-  useEffect(() => {
-    localStorage.setItem("exitPositions1", JSON.stringify(exitPositions1))
-  }, [exitPositions1])
-
-  useEffect(() => {
-    localStorage.setItem("exitPositions2", JSON.stringify(exitPositions2))
-  }, [exitPositions2])
-
   const exits = shiftsData[currentShift] || {}
 
-  const handleImageUpload1 = (imageData: string) => {
-    setImage1(imageData)
-    setIsMapping1(true)
-    localStorage.setItem("emergencyImage1", imageData)
+  const handleImageUpload1 = async (imageData: string) => {
+    try {
+      await saveImage(1, imageData)
+      setIsMapping1(true)
+    } catch (error) {
+      console.error('Error uploading image 1:', error)
+      alert('Error al subir la imagen. Por favor intenta de nuevo.')
+    }
   }
 
-  const handleImageUpload2 = (imageData: string) => {
-    setImage2(imageData)
-    setIsMapping2(true)
-    localStorage.setItem("emergencyImage2", imageData)
+  const handleImageUpload2 = async (imageData: string) => {
+    try {
+      await saveImage(2, imageData)
+      setIsMapping2(true)
+    } catch (error) {
+      console.error('Error uploading image 2:', error)
+      alert('Error al subir la imagen. Por favor intenta de nuevo.')
+    }
   }
 
-  const handleExitNameChange = (exitNumber: number, name: string) => {
-    setShiftsData((prev) => ({
-      ...prev,
-      [currentShift]: {
-        ...prev[currentShift],
-        [exitNumber]: name,
-      },
-    }))
+  const handleExitNameChange = async (exitNumber: number, name: string) => {
+    try {
+      await saveExitName(currentShift, exitNumber, name)
+    } catch (error) {
+      console.error('Error saving exit name:', error)
+      alert('Error al guardar el nombre. Por favor intenta de nuevo.')
+    }
   }
 
-  const handlePositionSet1 = (positions: { [key: number]: { x: number; y: number } }) => {
-    setExitPositions1(positions)
+  const handlePositionSet1 = async (positions: { [key: number]: { x: number; y: number } }) => {
+    try {
+      await saveExitPositions(1, positions)
+    } catch (error) {
+      console.error('Error saving positions 1:', error)
+      alert('Error al guardar las posiciones. Por favor intenta de nuevo.')
+    }
   }
 
-  const handlePositionSet2 = (positions: { [key: number]: { x: number; y: number } }) => {
-    setExitPositions2(positions)
+  const handlePositionSet2 = async (positions: { [key: number]: { x: number; y: number } }) => {
+    try {
+      await saveExitPositions(2, positions)
+    } catch (error) {
+      console.error('Error saving positions 2:', error)
+      alert('Error al guardar las posiciones. Por favor intenta de nuevo.')
+    }
   }
 
   const handleShiftChange = (shiftNumber: number) => {
@@ -96,33 +87,29 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     setSelectedExit(null)
   }
 
-  const handleClearAllData = () => {
-    // Limpiar todas las imágenes
-    setImage1(null)
-    setImage2(null)
-    localStorage.removeItem("emergencyImage1")
-    localStorage.removeItem("emergencyImage2")
+  const handleClearAllData = async () => {
+    try {
+      await clearAllData()
+      setSelectedExit(null)
+      setIsMapping1(false)
+      setIsMapping2(false)
+      setShowDeleteConfirm(false)
+      alert('Todos los datos han sido eliminados exitosamente.')
+    } catch (error) {
+      console.error('Error clearing data:', error)
+      alert('Error al eliminar los datos. Por favor intenta de nuevo.')
+    }
+  }
 
-    // Limpiar todas las posiciones
-    setExitPositions1({})
-    setExitPositions2({})
-    localStorage.removeItem("exitPositions1")
-    localStorage.removeItem("exitPositions2")
-
-    // Limpiar todas las asignaciones de salidas
-    setShiftsData({
-      1: {},
-      2: {},
-      3: {},
-      4: {},
-    })
-    localStorage.removeItem("shiftsData")
-
-    // Resetear estados
-    setSelectedExit(null)
-    setIsMapping1(false)
-    setIsMapping2(false)
-    setShowDeleteConfirm(false)
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-gradient-to-br from-background via-background to-muted flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-foreground text-lg font-medium">Cargando datos...</p>
+        </div>
+      </main>
+    )
   }
 
   return (
