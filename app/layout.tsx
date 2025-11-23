@@ -11,21 +11,8 @@ export const metadata: Metadata = {
   description: 'Asamblea de circuito 2025-2026',
   generator: 'v0.app',
   icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
+    icon: '/Captura de pantalla 2025-11-23 a la(s) 3.07.48 p. m..png',
+    apple: '/Captura de pantalla 2025-11-23 a la(s) 3.07.48 p. m..png',
   },
 }
 
