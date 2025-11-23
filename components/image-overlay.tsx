@@ -91,31 +91,45 @@ export default function ImageOverlay({
     <div className="space-y-4">
       {/* Controles de zoom para móvil */}
       {isMobile && (
-        <div className="flex items-center justify-center gap-2 bg-card/50 backdrop-blur-sm rounded-xl p-3 border border-border">
-          <button
-            onClick={handleZoomOut}
-            disabled={scale <= 1}
-            className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all"
-          >
-            🔍−
-          </button>
-          <span className="text-foreground font-semibold min-w-[60px] text-center">
-            {Math.round(scale * 100)}%
-          </span>
-          <button
-            onClick={handleZoomIn}
-            disabled={scale >= 3}
-            className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all"
-          >
-            🔍+
-          </button>
-          {scale > 1 && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-center gap-2 bg-card/50 backdrop-blur-sm rounded-xl p-3 border border-border">
             <button
-              onClick={handleResetZoom}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 font-medium transition-all"
+              onClick={handleZoomOut}
+              disabled={scale <= 1}
+              className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all"
             >
-              Resetear
+              🔍−
             </button>
+            <span className="text-foreground font-semibold min-w-[60px] text-center">
+              {Math.round(scale * 100)}%
+            </span>
+            <button
+              onClick={handleZoomIn}
+              disabled={scale >= 3}
+              className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all"
+            >
+              🔍+
+            </button>
+            {scale > 1 && (
+              <button
+                onClick={handleResetZoom}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 font-medium transition-all"
+              >
+                Resetear
+              </button>
+            )}
+          </div>
+
+          {/* Botón para mostrar todos los puntos */}
+          {selectedExit && (
+            <div className="flex justify-center">
+              <button
+                onClick={() => onExitClick(0)}
+                className="px-6 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 font-medium transition-all border border-primary/30"
+              >
+                ↩️ Mostrar todos los puntos
+              </button>
+            </div>
           )}
         </div>
       )}
@@ -153,12 +167,15 @@ export default function ImageOverlay({
                 const pos = positionsToUse[num]
                 const name = exits[num]
                 const isSelected = selectedExit === num
+                const shouldHide = selectedExit && selectedExit !== num
 
                 return (
                   <div
                     key={num}
                     ref={(el) => (pointRefs.current[num] = el)}
-                    className="absolute pointer-events-auto transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
+                    className={`absolute pointer-events-auto transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group transition-all duration-300 ${
+                      shouldHide ? 'opacity-0 scale-0' : 'opacity-100 scale-100'
+                    }`}
                     style={{
                       left: `${pos.x}%`,
                       top: `${pos.y}%`,
@@ -169,7 +186,7 @@ export default function ImageOverlay({
                     <div
                       className={`${pointSize} rounded-full flex items-center justify-center font-bold text-white transition-all shadow-lg ${
                         isSelected
-                          ? "bg-primary scale-125 ring-4 ring-primary/50 ring-offset-2 animate-pulse"
+                          ? "bg-primary scale-150 ring-4 ring-primary/50 ring-offset-2 animate-pulse"
                           : "bg-secondary hover:bg-secondary/90 active:scale-110"
                       }`}
                     >
