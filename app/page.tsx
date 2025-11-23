@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import ImageOverlay from "@/components/image-overlay"
 import { useSupabaseData } from "@/hooks/use-supabase-data"
 
@@ -16,8 +16,21 @@ export default function Home() {
 
   const [currentShift, setCurrentShift] = useState<number | null>(null)
   const [selectedExit, setSelectedExit] = useState<number | null>(null)
+  const plansContainerRef = useRef<HTMLDivElement>(null)
 
   const exits = currentShift ? shiftsData[currentShift] || {} : {}
+
+  const handleExitClick = (exitNum: number) => {
+    setSelectedExit(exitNum)
+
+    // Scroll hacia el contenedor de los planos
+    if (plansContainerRef.current) {
+      plansContainerRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      })
+    }
+  }
 
   if (loading) {
     return (
@@ -99,19 +112,19 @@ export default function Home() {
             </div>
           </>
         ) : (
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-6xl mx-auto px-2">
             <button
               onClick={() => {
                 setCurrentShift(null)
                 setSelectedExit(null)
               }}
-              className="mb-8 inline-flex items-center gap-2 px-6 py-3 bg-secondary text-secondary-foreground rounded-xl hover:bg-secondary/90 transition-all hover:shadow-lg font-medium"
+              className="mb-6 md:mb-8 inline-flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 bg-secondary text-secondary-foreground rounded-xl hover:bg-secondary/90 transition-all hover:shadow-lg font-medium text-sm md:text-base"
             >
               <span>←</span>
               <span>Volver a turnos</span>
             </button>
 
-            <div className="bg-gradient-to-br from-card to-card/80 backdrop-blur-sm rounded-2xl p-8 md:p-12 border-2 border-border shadow-2xl">
+            <div className="bg-gradient-to-br from-card to-card/80 backdrop-blur-sm rounded-2xl p-4 md:p-8 lg:p-12 border-2 border-border shadow-2xl">
               <div className="text-center mb-12">
                 <div className="inline-block px-6 py-2 bg-primary/10 rounded-full mb-4">
                   <p className="text-sm font-semibold text-primary uppercase tracking-wider">Turno seleccionado</p>
@@ -122,20 +135,20 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="space-y-8">
+              <div ref={plansContainerRef} className="space-y-8">
                 {image1 && (
-                  <div className="bg-gradient-to-br from-background to-muted rounded-2xl p-8 border-2 border-primary/20 shadow-lg hover:shadow-xl transition-shadow">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                  <div className="bg-gradient-to-br from-background to-muted rounded-2xl p-4 md:p-8 border-2 border-primary/20 shadow-lg hover:shadow-xl transition-shadow">
+                    <div className="flex items-center gap-3 mb-4 md:mb-6">
+                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
                         <span className="text-primary font-bold">📍</span>
                       </div>
-                      <h2 className="text-xl font-bold text-foreground">Plano de salida - Puntos 1-8</h2>
+                      <h2 className="text-lg md:text-xl font-bold text-foreground">Plano de salida - Puntos 1-8</h2>
                     </div>
                     <ImageOverlay
                       image={image1}
                       exits={exits}
                       selectedExit={selectedExit}
-                      onExitClick={setSelectedExit}
+                      onExitClick={handleExitClick}
                       exitPositions={exitPositions1}
                       startNumber={1}
                     />
@@ -143,18 +156,18 @@ export default function Home() {
                 )}
 
                 {image2 && (
-                  <div className="bg-gradient-to-br from-background to-muted rounded-2xl p-8 border-2 border-primary/20 shadow-lg hover:shadow-xl transition-shadow">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                  <div className="bg-gradient-to-br from-background to-muted rounded-2xl p-4 md:p-8 border-2 border-primary/20 shadow-lg hover:shadow-xl transition-shadow">
+                    <div className="flex items-center gap-3 mb-4 md:mb-6">
+                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
                         <span className="text-primary font-bold">📍</span>
                       </div>
-                      <h2 className="text-xl font-bold text-foreground">Plano de salida - Puntos 9-10</h2>
+                      <h2 className="text-lg md:text-xl font-bold text-foreground">Plano de salida - Puntos 9-10</h2>
                     </div>
                     <ImageOverlay
                       image={image2}
                       exits={exits}
                       selectedExit={selectedExit}
-                      onExitClick={setSelectedExit}
+                      onExitClick={handleExitClick}
                       exitPositions={exitPositions2}
                       startNumber={9}
                     />
@@ -173,23 +186,28 @@ export default function Home() {
               </div>
 
               {exits && Object.keys(exits).length > 0 && (
-                <div className="mt-12 pt-8 border-t-2 border-border">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                      <span className="text-primary font-bold">🚪</span>
+                <div className="mt-8 md:mt-12 pt-6 md:pt-8 border-t-2 border-border">
+                  <div className="mb-4 md:mb-6">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                        <span className="text-primary font-bold">🚪</span>
+                      </div>
+                      <h3 className="text-lg md:text-xl font-bold text-foreground">Puntos de salida</h3>
                     </div>
-                    <h3 className="text-xl font-bold text-foreground">Puntos de salida</h3>
+                    <p className="text-xs md:text-sm text-muted-foreground ml-13">
+                      👆 Toca un punto para verlo en el plano de arriba
+                    </p>
                   </div>
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-4">
                     {Array.from({ length: 10 }, (_, i) => i + 1).map((exitNum) => (
                       <div
                         key={exitNum}
-                        className={`group relative bg-gradient-to-br from-background to-muted border-2 rounded-xl p-5 text-center cursor-pointer transition-all hover:shadow-lg ${
+                        className={`group relative bg-gradient-to-br from-background to-muted border-2 rounded-xl p-5 text-center cursor-pointer transition-all hover:shadow-lg active:scale-95 ${
                           selectedExit === exitNum
-                            ? "border-primary bg-primary/10 shadow-lg scale-105"
+                            ? "border-primary bg-primary/10 shadow-lg scale-105 ring-2 ring-primary/30"
                             : "border-border hover:border-primary hover:scale-105"
                         }`}
-                        onClick={() => setSelectedExit(exitNum)}
+                        onClick={() => handleExitClick(exitNum)}
                       >
                         <div className="absolute -top-2 -right-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-md">
                           <span className="text-white text-xs font-bold">{exitNum}</span>
