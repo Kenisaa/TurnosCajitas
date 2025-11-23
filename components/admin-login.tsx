@@ -77,7 +77,7 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
         </div>
 
         <div className="mt-4 text-center text-xs text-muted-foreground">
-          <p>Demo: Contraseña es "admin123"</p>
+          <p></p>
         </div>
       </div>
     </main>
